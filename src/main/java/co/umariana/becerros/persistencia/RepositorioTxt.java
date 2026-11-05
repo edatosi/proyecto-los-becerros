@@ -3,7 +3,10 @@ package co.umariana.becerros.persistencia;
 import co.umariana.becerros.modelo.Becerro;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,13 +35,42 @@ public class RepositorioTxt implements Repositorio {
 
     @Override
     public List<Becerro> cargar() throws IOException {
-        // TODO (PERSISTENCIA)
-        throw new UnsupportedOperationException("TODO: cargar()");
+        List<Becerro> becerros = new ArrayList<>();
+        if (!Files.exists(archivo)) {
+            return becerros;
+        }
+        for (String linea : Files.readAllLines(archivo, StandardCharsets.UTF_8)) {
+            if (linea.isBlank()) {
+                continue;
+            }
+            String[] campos = linea.split(";", -1);
+            if (campos.length != 7) {
+                continue;
+            }
+            try {
+                becerros.add(new Becerro(campos[0], campos[1], campos[2],
+                        Integer.parseInt(campos[3]), Double.parseDouble(campos[4]),
+                        campos[5], campos[6]));
+            } catch (NumberFormatException e) {
+                // Una línea dañada no impide cargar las demás.
+            }
+        }
+        return becerros;
     }
 
     @Override
     public void guardar(List<Becerro> becerros) throws IOException {
-        // TODO (PERSISTENCIA)
-        throw new UnsupportedOperationException("TODO: guardar()");
+        Path carpeta = archivo.getParent();
+        if (carpeta != null) {
+            Files.createDirectories(carpeta);
+        }
+        List<String> lineas = new ArrayList<>();
+        for (Becerro becerro : becerros) {
+            lineas.add(becerro.getCodigo() + ";" + becerro.getTitulo() + ";"
+                    + becerro.getCategoria() + ";" + becerro.getApetito() + ";"
+                    + becerro.getPesoKg() + ";" + becerro.getDescripcion() + ";"
+                    + becerro.getArchivo());
+        }
+        Files.write(archivo, lineas, StandardCharsets.UTF_8);
     }
 }

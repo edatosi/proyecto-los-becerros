@@ -1,5 +1,6 @@
 package co.umariana.becerros.web;
 
+import co.umariana.becerros.modelo.Becerro;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -25,7 +26,17 @@ public class Visor extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // TODO (SERVLETS)
-        throw new UnsupportedOperationException("TODO: Visor.doGet()");
+        String accion = req.getParameter("accion");
+        Becerro becerro;
+        if ("siguiente".equals(accion)) {
+            becerro = Contexto.servicio().siguiente();
+        } else if ("anterior".equals(accion)) {
+            becerro = Contexto.servicio().anterior();
+        } else {
+            becerro = Contexto.servicio().actual();
+        }
+        req.setAttribute("becerro", becerro);
+        req.setAttribute("total", Contexto.servicio().total());
+        req.getRequestDispatcher("/WEB-INF/vistas/visor.jsp").forward(req, resp);
     }
 }
